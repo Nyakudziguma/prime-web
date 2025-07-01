@@ -53,7 +53,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <main className="p-4 md:p-6 flex-1 flex flex-col overflow-y-auto relative">{children}</main>
 
         {/* Footer - Only shown on mobile */}
-        {isMobile && <Footer />}
       </div>
     </div>
   )
