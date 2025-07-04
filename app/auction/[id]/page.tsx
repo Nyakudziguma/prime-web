@@ -488,7 +488,7 @@ export default function ProductDetails() {
                     }
                   }}
                   disabled={isSubmitting}
-                  className={`mt-2 w-full py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors ${
+                  className={`mt-2 w-full py-2 bg-teal-700 text-white rounded-full hover:bg-blue-700 transition-colors ${
                     isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
                   }`}
                 >
