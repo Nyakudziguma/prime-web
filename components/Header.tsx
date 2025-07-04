@@ -44,6 +44,7 @@ const Header = ({ toggleSidebar }: { toggleSidebar?: () => void }) => {
               className="filter brightness-0 invert"
               onClick={() => router.push('/dashboard')}
             />
+            <h3 className="text-xl font-bold text-white  md:block">PRIME AUCTIONS</h3>
           </div>
         </div>
 

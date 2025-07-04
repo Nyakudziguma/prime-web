@@ -68,7 +68,7 @@ const SettingsScreen = () => {
             className="flex justify-between items-center p-4 border-b border-gray-100 w-full text-left hover:bg-gray-50"
             onClick={() => router.push('/terms-of-service')}
           >
-            <span className="text-gray-700">Terms of Service</span>
+            <span className="text-gray-700">Terms and Conditions</span>
             <FiChevronRight className="text-gray-400 text-xl" />
           </button>
 
@@ -80,6 +80,20 @@ const SettingsScreen = () => {
             <FiChevronRight className="text-gray-400 text-xl" />
           </button>
 
+          <button 
+            className="flex justify-between items-center p-4 border-b border-gray-100 w-full text-left hover:bg-gray-50"
+            onClick={() => router.push('/buyers-guide')}
+          >
+            <span className="text-gray-700">Buyer's Guide</span>
+            <FiChevronRight className="text-gray-400 text-xl" />
+          </button>
+          <button 
+            className="flex justify-between items-center p-4 border-b border-gray-100 w-full text-left hover:bg-gray-50"
+            onClick={() => router.push('/sellers-guide')}
+          >
+            <span className="text-gray-700">Seller's Guide</span>
+            <FiChevronRight className="text-gray-400 text-xl" />
+          </button>
           <button 
             className="flex justify-between items-center p-4 border-b border-gray-100 w-full text-left hover:bg-gray-50"
             onClick={() => router.push('/profile/edit-profile')}

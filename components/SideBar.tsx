@@ -12,7 +12,10 @@ import {
   CogIcon,
   ArrowRightOnRectangleIcon,
   ArrowLeftOnRectangleIcon,
-  ShoppingCartIcon
+  ShoppingCartIcon,
+  DocumentChartBarIcon,
+  DocumentArrowDownIcon,
+  CreditCardIcon
 } from '@heroicons/react/24/outline'
 import logo from '@/assets/images/logo_white.png'
 
@@ -38,10 +41,13 @@ export default function Sidebar() {
   const navItems = [
     { name: 'Home', icon: HomeIcon, route: '/dashboard', protected: false },
     { name: 'Auctions', icon: ShoppingCartIcon, route: '/browse-auctions', protected: false },
-    { name: 'My Bids', icon: ScaleIcon, route: '/my-bids', protected: true, badge: bidCount },
+    { name: 'My Bids', icon: ScaleIcon, route: '/my-bids', protected: true },
     { name: 'Messages', icon: InboxIcon, route: '/messages', protected: true, badge: unreadMessages },
     { name: 'Profile', icon: UserIcon, route: '/profile', protected: true },
-    { name: 'Settings', icon: CogIcon, route: '/settings', protected: true }
+    { name: 'Payments', icon: CreditCardIcon, route: '/deposits', protected: true },
+    { name: 'Buyer\'s Guide', icon: DocumentChartBarIcon, route: '/buyers-guide', protected: true },
+    { name: 'Seller\'s Guide', icon: DocumentArrowDownIcon, route: '/sellers-guide', protected: true },
+    { name: 'Settings', icon: CogIcon, route: '/settings', protected: true },
   ]
 
   // Check if current route matches or starts with the item's route
@@ -97,6 +103,29 @@ export default function Sidebar() {
           })}
         </ul>
       </nav>
+      {/* Extras Section */}
+      <div className="p-4 border-t border-gray-100 space-y-3">
+        <button
+          onClick={() => window.open('https://backoffice.primeauctions.shop/media/prime%20auctions.apk', '_blank')}
+          className="flex items-center w-full p-3 text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-colors"
+        >
+          <svg className="h-5 w-5 mr-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path d="M3 3L21 12L3 21V3Z" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span>Download App</span>
+        </button>
+
+        <button
+          onClick={() => window.open('https://whatsapp.com/channel/0029VbBS8l4I1rcbsbktrQ14', '_blank')}
+          className="flex items-center w-full p-3 text-teal-800 bg-teal-100 hover:bg-teal-200 rounded-lg transition-colors"
+        >
+          <svg className="h-5 w-5 mr-3 text-teal-700" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M9.75 14.25L9 19l2.5-2.25L17.25 21 21 3 3 10.5l6.75 1.5z" />
+          </svg>
+          <span>Join Community</span>
+        </button>
+      </div>
+
 
       {/* Auth Section */}
       <div className="p-4 border-t border-gray-200">

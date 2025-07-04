@@ -183,13 +183,23 @@ const BrowseAuctions = () => {
                       />
                     </div>
                     <div className="p-3">
-                      <h3 className="font-semibold text-sm text-gray-800 truncate">{auction.title}</h3>
-                      <p className="text-xs text-gray-500 truncate">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-sm text-gray-800 truncate">
+                          {auction.title}
+                        </h3>
+                        <span className="bg-yellow-100 text-yellow-700 text-xs font-semibold px-2 py-0.5 rounded-full ml-2 whitespace-nowrap">
+                          Lot #{auction.id}
+                        </span>
+                      </div>
+
+                      <p className="text-xs text-gray-500 truncate mt-1">
                         {auction.short_description?.replace(/<[^>]+>/g, '')}
                       </p>
+
                       <AuctionTimer endTime={auction.end_time} inOfferPeriod={auction.in_offer_period} />
                       {renderAuctionFooter(auction)}
                     </div>
+
                   </div>
                 </Link>
               </div>
@@ -208,16 +218,24 @@ const BrowseAuctions = () => {
                       className="object-cover"
                     />
                   </div>
-                  <div className="flex-1 p-3 flex flex-col justify-between">
-                    <div>
-                      <h3 className="font-semibold text-sm text-gray-800 truncate">{auction.title}</h3>
-                      <p className="text-xs text-gray-500 line-clamp-2">
+                  <div className="p-3">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-sm text-gray-800 truncate">
+                          {auction.title}
+                        </h3>
+                        <span className="bg-yellow-100 text-yellow-700 text-xs font-semibold px-2 py-0.5 rounded-full ml-2 whitespace-nowrap">
+                          Lot #{auction.id}
+                        </span>
+                      </div>
+
+                      <p className="text-xs text-gray-500 truncate mt-1">
                         {auction.short_description?.replace(/<[^>]+>/g, '')}
                       </p>
+
                       <AuctionTimer endTime={auction.end_time} inOfferPeriod={auction.in_offer_period} />
+                      {renderAuctionFooter(auction)}
                     </div>
-                    {renderAuctionFooter(auction)}
-                  </div>
+
                 </div>
               </Link>
             ))}

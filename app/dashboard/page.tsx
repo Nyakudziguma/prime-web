@@ -143,7 +143,7 @@ export default function Dashboard() {
                   if (isLoggedIn) {
                     router.push(`/auction/${auction.id}`)
                   } else {
-                    router.push('/auth/login')
+                    router.push('/auth/login') 
                   }
                 }}
               >
@@ -224,22 +224,34 @@ export default function Dashboard() {
     <DashboardLayout>
       {/* Search Bar */}
       <div className="flex items-center bg-white rounded-full px-4 py-2 shadow-sm mb-4">
+        
         <input
           type="text"
           placeholder="Ex. Mercedes Benz 2018"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="ml-2 flex-1 text-gray-700 outline-none"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              router.push(`/browse-auctions?querySearch=${encodeURIComponent(searchQuery)}`)
+            }
+          }}
         />
       </div>
 
       <Banner/>
-      <div className="flex justify-center mt-4 mb-6">
+      <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4 mb-6">
         <Link
           href="/sell"
-          className="bg-teal-900 px-6 py-3 rounded-full shadow-md text-white font-semibold hover:bg-teal-800 transition"
+          className="bg-teal-900 px-6 py-3 rounded-full shadow-md text-white font-semibold hover:bg-teal-800 transition text-center"
         >
           Sell with Prime Auctions
+        </Link>
+        <Link
+          href="/browse-auctions"
+          className="bg-yellow-600 px-6 py-3 rounded-full shadow-md text-white font-semibold hover:bg-yellow-500 transition text-center"
+        >
+         Start Bidding Today / Buy It Now
         </Link>
       </div>
 

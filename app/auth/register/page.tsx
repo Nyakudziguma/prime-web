@@ -7,10 +7,14 @@ import axios from 'axios'
 import { EnvelopeIcon, LockClosedIcon, UserIcon, PhoneIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
 import { API_URL } from '@/components/config/config'
 import toast, { Toaster } from 'react-hot-toast'
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 
 export default function Register() {
   const router = useRouter()
-  const [step, setStep] = useState(1) // 1 = registration, 2 = OTP verification
+  const [step, setStep] = useState(1) 
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
   const [formData, setFormData] = useState({
     email: '',
     full_name: '',
@@ -224,10 +228,10 @@ export default function Register() {
                   <input
                     id="password"
                     name="password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     autoComplete="new-password"
                     required
-                    className={`block w-full pl-10 pr-3 py-2 border ${errors.password ? 'border-red-300 text-red-900 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-teal-500 focus:border-teal-500'} rounded-md shadow-sm focus:outline-none sm:text-sm`}
+                    className={`block w-full pl-10 pr-10 py-2 border ${errors.password ? 'border-red-300 text-red-900 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-teal-500 focus:border-teal-500'} rounded-md shadow-sm focus:outline-none sm:text-sm`}
                     placeholder="••••••••"
                     value={formData.password}
                     onChange={(e) => {
@@ -235,6 +239,19 @@ export default function Register() {
                       validatePassword(e.target.value)
                     }}
                   />
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <button
+                      type="button"
+                      className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeSlashIcon className="h-5 w-5" />
+                      ) : (
+                        <EyeIcon className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
                 <div className="mt-2 space-y-1">
                   <PasswordRequirement met={passwordChecks.length} text="At least 8 characters" />
@@ -258,14 +275,27 @@ export default function Register() {
                   <input
                     id="confirm_password"
                     name="confirm_password"
-                    type="password"
+                    type={showConfirmPassword ? "text" : "password"}
                     autoComplete="new-password"
                     required
-                    className={`block w-full pl-10 pr-3 py-2 border ${errors.confirm_password ? 'border-red-300 text-red-900 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-teal-500 focus:border-teal-500'} rounded-md shadow-sm focus:outline-none sm:text-sm`}
+                    className={`block w-full pl-10 pr-10 py-2 border ${errors.confirm_password ? 'border-red-300 text-red-900 focus:ring-red-500 focus:border-red-500' : 'border-gray-300 focus:ring-teal-500 focus:border-teal-500'} rounded-md shadow-sm focus:outline-none sm:text-sm`}
                     placeholder="••••••••"
                     value={formData.confirm_password}
                     onChange={(e) => setFormData({...formData, confirm_password: e.target.value})}
                   />
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <button
+                      type="button"
+                      className="text-gray-500 hover:text-gray-700 focus:outline-none"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeSlashIcon className="h-5 w-5" />
+                      ) : (
+                        <EyeIcon className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
                 {errors.confirm_password && <p className="mt-2 text-sm text-red-600">{errors.confirm_password}</p>}
               </div>

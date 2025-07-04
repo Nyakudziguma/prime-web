@@ -272,7 +272,6 @@ export default function ChangePasswordPage() {
         </main>
 
         {/* Footer - Only shown on mobile */}
-        <Footer />
       </div>
     </div>
   )

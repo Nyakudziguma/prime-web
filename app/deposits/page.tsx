@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import DashboardLayout from '@/components/DashboardLayout';
@@ -10,12 +10,15 @@ import { FaBitcoin, FaMoneyBillWave } from 'react-icons/fa';
 import { HiOutlineCash } from 'react-icons/hi';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Img from '../../assets/images/btc-qr.jpeg'; 
+import Img from '../../assets/images/btc-qr.jpeg';
+
 const DepositScreen = () => {
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [proofImage, setProofImage] = useState<string | null>(null);
   const [amount, setAmount] = useState('');
   const [loading, setLoading] = useState(false);
+  const [balance, setBalance] = useState<number>(0);
+  const [totalDeposits, setTotalDeposits] = useState<number>(0);
   const router = useRouter();
 
   const paymentMethods = [
@@ -23,19 +26,40 @@ const DepositScreen = () => {
     { id: 'usdt', name: 'USDT (TRC20)', icon: <FiDollarSign size={24} /> },
     { id: 'btc', name: 'Bitcoin', icon: <FaBitcoin size={24} /> },
     { id: 'cash', name: 'Cash Payment', icon: <HiOutlineCash size={24} /> },
+    { id: 'bank', name: 'Bank Transfer', icon: <FaMoneyBillWave size={24} /> },
   ];
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      const token = localStorage.getItem('access');
+      try {
+        const res = await fetch(`${API_URL}/user-stats/`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        setBalance(data.balance);
+        setTotalDeposits(data.total_deposits);
+      } catch (err) {
+        console.error('Failed to load user stats:', err);
+        toast.error('Could not load balance info');
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type and size
     if (!file.type.startsWith('image/')) {
       toast.error('Please upload an image file');
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+    if (file.size > 5 * 1024 * 1024) {
       toast.error('Image size should be less than 5MB');
       return;
     }
@@ -61,7 +85,7 @@ const DepositScreen = () => {
       return;
     }
 
-    if (selectedMethod !== 'cash' && !proofImage) {
+    if (!['cash', 'bank'].includes(selectedMethod) && !proofImage) {
       toast.error('Please attach proof of payment');
       return;
     }
@@ -71,11 +95,11 @@ const DepositScreen = () => {
 
     try {
       const token = localStorage.getItem('access');
-      
+
       const formData = new FormData();
       formData.append('payment_method', selectedMethod);
       formData.append('amount', amount);
-      
+
       if (proofImage && proofImage.startsWith('data:')) {
         const blob = await fetch(proofImage).then(res => res.blob());
         formData.append('proof', blob, 'proof.jpg');
@@ -163,6 +187,17 @@ const DepositScreen = () => {
             <p className="mt-3 text-gray-600">No proof of payment needed for cash deposits</p>
           </div>
         );
+      case 'bank':
+        return (
+          <div className="mt-4 bg-yellow-50 p-4 rounded-lg">
+            <h3 className="font-semibold text-lg mb-2">Bank Transfer Details</h3>
+            <p className="text-gray-700">Account Name: <span className="font-bold">M J Baxter</span></p>
+            <p className="text-gray-700">Bank: <span className="font-bold">Nedbank</span></p>
+            <p className="text-gray-700">Branch: <span className="font-bold">Mutare, Branch Code 18503</span></p>
+            <p className="text-gray-700">Account Number: <span className="font-bold">11992413567</span></p>
+            <p className="mt-2 text-gray-600">Use your username as payment reference</p>
+          </div>
+        );
       default:
         return null;
     }
@@ -170,8 +205,21 @@ const DepositScreen = () => {
 
   return (
     <DashboardLayout>
-        <ToastContainer/>
+      <ToastContainer />
       <div className="flex-1 bg-gray-50 p-4 pb-20">
+        {/* User balance and deposits */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="bg-white rounded-lg p-4 shadow">
+            <h3 className="text-gray-500 text-sm">Current Balance</h3>
+            <p className="text-2xl font-semibold text-teal-600">${balance.toFixed(2)}</p>
+          </div>
+          <div className="bg-white rounded-lg p-4 shadow">
+            <h3 className="text-gray-500 text-sm">Total Deposits</h3>
+            <p className="text-2xl font-semibold text-purple-600">${totalDeposits.toFixed(2)}</p>
+          </div>
+        </div>
+
+        {/* Payment Method Selection */}
         <div className="mb-6">
           <h2 className="text-lg font-semibold mb-3">Select Payment Method</h2>
           <div className="grid grid-cols-2 gap-3">
@@ -217,7 +265,7 @@ const DepositScreen = () => {
 
             {renderPaymentDetails()}
 
-            {selectedMethod !== 'cash' && (
+            {!['cash', 'bank'].includes(selectedMethod) && (
               <div className="mt-6">
                 <label className="text-lg font-semibold mb-3 block">Proof of Payment</label>
                 <label className="border border-dashed border-gray-400 rounded-lg p-6 flex flex-col items-center cursor-pointer hover:bg-gray-50 transition-colors">

@@ -273,19 +273,11 @@ export default function ProductDetails() {
     <DashboardLayout>
       <ToastContainer/>
       
-      {/* Main Content */}
-      <div className="flex-1 pb-36">
-        {/* Back Button */}
-        <button 
-          onClick={() => router.back()}
-          className="absolute top-4 left-4 z-10 bg-black/50 text-white p-2 rounded-full"
-        >
-          <FiChevronLeft size={24} />
-        </button>
-
+      {/* Main Content - Removed pb-36 */}
+      <div className="flex-1">
         {/* Image Carousel */}
         <div className="relative h-96 overflow-hidden">
-          <div className="flex h-full" style={{ transform: `translateX(-${activeIndex * 100}%)` }}>
+          <div className="flex h-full transition-transform duration-300" style={{ transform: `translateX(-${activeIndex * 100}%)` }}>
             {data.images.map((img: any, index: number) => (
               <div key={index} className="w-full flex-shrink-0 relative">
                 <Image
@@ -299,22 +291,34 @@ export default function ProductDetails() {
               </div>
             ))}
           </div>
-          
-          {/* Dot Indicators */}
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-            {data.images.map((_: any, index: number) => (
-              <button
-                key={index}
-                onClick={() => setActiveIndex(index)}
-                className={`w-2 h-2 mx-1 rounded-full ${index === activeIndex ? 'bg-teal-600' : 'bg-gray-300'}`}
-                aria-label={`Go to image ${index + 1}`}
-              />
-            ))}
-          </div>
+
+          {/* Prev Arrow */}
+          {data.images.length > 1 && (
+            <button
+              onClick={() => setActiveIndex((prev) => (prev === 0 ? data.images.length - 1 : prev - 1))}
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-teal-700 rounded-full p-2 shadow"
+              aria-label="Previous image"
+              style={{ zIndex: 2 }}
+            >
+              <FiChevronLeft size={28} />
+            </button>
+          )}
+
+          {/* Next Arrow */}
+          {data.images.length > 1 && (
+            <button
+              onClick={() => setActiveIndex((prev) => (prev === data.images.length - 1 ? 0 : prev + 1))}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 hover:bg-white text-teal-700 rounded-full p-2 shadow"
+              aria-label="Next image"
+              style={{ zIndex: 2 }}
+            >
+              <FiChevronLeft size={28} className="rotate-180" />
+            </button>
+          )}
         </div>
 
-        {/* Product Info */}
-        <div className="px-4 py-4 space-y-4">
+        {/* Product Info - Added mb-24 */}
+        <div className="px-4 py-4 space-y-4 mb-24">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">{data.title}</h1>
           </div>
@@ -346,7 +350,7 @@ export default function ProductDetails() {
           </div>
 
           {/* Fees and Taxes */}
-          <div className="bg-gray-100 rounded-xl p-4 shadow-sm pt-8 pb-20">
+          <div className="bg-gray-100 rounded-xl p-4 shadow-sm pb-40">
             <h2 className="text-base font-semibold text-gray-800 mb-3">Fees & Taxes</h2>
             <div className="space-y-3 mb-4">
               <div>
@@ -389,9 +393,9 @@ export default function ProductDetails() {
           </div>
         </div>
 
-        {/* Bottom Bid Section */}
-        <div className="fixed bottom-0 left-0 md:left-64 right-0 bg-white border-t border-gray-200 px-4 py-4 flex justify-center">
-          <div className="space-y-4 w-full max-w-lg">
+        {/* Bottom Bid Section - Reduced padding and added shadow */}
+        <div className="fixed bottom-0 left-0 md:left-64 right-0 bg-white border-t border-gray-200 px-4 py-3 shadow-md">
+          <div className="space-y-3 w-full max-w-lg mx-auto">
             <div className="items-center space-y-2 w-full">
               {isOfferPeriod ? (
                 <>
@@ -440,8 +444,40 @@ export default function ProductDetails() {
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex space-x-2">
+            {/* Bid Form */}
+            <div className="flex flex-col items-center w-full">
+              <div className="flex w-full rounded-full overflow-hidden border border-gray-300 bg-gray-50">
+                <input
+                  type="number"
+                  value={bidAmount}
+                  onChange={(e) => setBidAmount(e.target.value)}
+                  className="flex-1 px-4 py-2 text-sm text-gray-800 bg-transparent outline-none"
+                  placeholder={`Enter your ${isOfferPeriod ? 'offer' : 'bid'}`}
+                />
+                <button
+                  onClick={() => {
+                    if (isLoggedIn) {
+                      isOfferPeriod ? handleOfferSubmit() : handleBidSubmit();
+                    } else {
+                      router.push('/auth/login');
+                    }
+                  }}
+                  disabled={isSubmitting}
+                  className={`px-4 py-2 ${
+                    isLoggedIn ? 'bg-teal-700 hover:bg-teal-800' : 'bg-yellow-500 hover:bg-yellow-600'
+                  } ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''} text-white font-semibold text-sm transition-colors`}
+                >
+                  {isSubmitting ? (
+                    'Processing...'
+                  ) : (
+                    isLoggedIn ? 
+                      (isOfferPeriod ? 'Make Offer' : 'Place Bid') : 
+                      `Login to ${isOfferPeriod ? 'Offer' : 'Bid'}`
+                  )}
+                </button>
+              </div>
+
+              {/* Buy Now Button */}
               {data.buy_now_price && (
                 <button
                   onClick={() => {
@@ -452,35 +488,13 @@ export default function ProductDetails() {
                     }
                   }}
                   disabled={isSubmitting}
-                  className={`flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors ${
-                    isSubmitting ? 'opacity-70' : ''
+                  className={`mt-2 w-full py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors ${
+                    isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
                   }`}
                 >
-                  Buy Now
+                  Buy Now for ${data.buy_now_price}
                 </button>
               )}
-              
-              <button 
-                onClick={() => {
-                  if (isLoggedIn) {
-                    isOfferPeriod ? handleOfferSubmit() : handleBidSubmit();
-                  } else {
-                    router.push('/auth/login');
-                  }
-                }}
-                disabled={isSubmitting}
-                className={`flex-1 py-2 ${
-                  isLoggedIn ? 'bg-teal-700 hover:bg-teal-800' : 'bg-yellow-500 hover:bg-yellow-600'
-                } ${isSubmitting ? 'opacity-70' : ''} text-white rounded-lg transition-colors`}
-              >
-                {isSubmitting ? (
-                  'Processing...'
-                ) : (
-                  isLoggedIn ? 
-                    (isOfferPeriod ? 'Make Offer' : 'Place Bid') : 
-                    `Login to ${isOfferPeriod ? 'Offer' : 'Bid'}`
-                )}
-              </button>
             </div>
           </div>
         </div>
