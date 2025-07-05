@@ -50,21 +50,6 @@ const Header = ({ toggleSidebar }: { toggleSidebar?: () => void }) => {
 
         {/* Right section - Icons and auth */}
         <div className="flex items-center space-x-4">
-          {/* Mobile search button (hidden on desktop) */}
-          <button className="md:hidden p-2 rounded-md text-white hover:text-gray-900 hover:bg-white">
-            <FiSearch className="h-6 w-6" />
-          </button>
-
-          {/* Notification bell */}
-          <button className="p-2 rounded-full text-white hover:text-gray-900 hover:bg-white relative">
-            <FiBell className="h-6 w-6" />
-            {unreadMessages > 0 && (
-              <span className="absolute top-0 right-0 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                {unreadMessages}
-              </span>
-            )}
-          </button>
-
           {/* Auth buttons */}
           {isLoggedIn ? (
             <button
