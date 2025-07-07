@@ -15,7 +15,8 @@ import {
   ShoppingCartIcon,
   DocumentChartBarIcon,
   DocumentArrowDownIcon,
-  CreditCardIcon
+  CreditCardIcon,
+  DocumentCheckIcon
 } from '@heroicons/react/24/outline'
 import logo from '@/assets/images/logo_white.png'
 
@@ -48,6 +49,8 @@ export default function Sidebar() {
     { name: 'Buyer\'s Guide', icon: DocumentChartBarIcon, route: '/buyers-guide', protected: true },
     { name: 'Seller\'s Guide', icon: DocumentArrowDownIcon, route: '/sellers-guide', protected: true },
     { name: 'Settings', icon: CogIcon, route: '/settings', protected: true },
+    {name: 'About Us', icon: UserIcon, route: '/about', protected: false},
+    {name: 'Terms & Conditions', icon: DocumentCheckIcon , route: '/terms-of-service', protected: false},
   ]
 
   // Check if current route matches or starts with the item's route

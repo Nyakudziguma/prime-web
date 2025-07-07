@@ -13,6 +13,8 @@ type ChatMessage = {
   message: string;
   sender: string;
   created_at: string;
+  is_admin?: boolean;
+  read?: boolean;
 };
 
 const ChatRoom = () => {
@@ -21,8 +23,11 @@ const ChatRoom = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [userEmail, setUserEmail] = useState('');
+  const [isConnected, setIsConnected] = useState(false);
   const ws = useRef<WebSocket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const reconnectAttempts = useRef(0);
+  const maxReconnectAttempts = 5;
 
   const fetchMessages = async () => {
     const token = localStorage.getItem('access');
@@ -41,62 +46,79 @@ const ChatRoom = () => {
     }
   };
 
-  const setupWebSocket = async () => {
-    const token = localStorage.getItem('access');
-    ws.current = new WebSocket(`${WS_MAIN_URL}chat/${id}/?token=${token}`);
+  const setupWebSocket = () => {
+  const token = localStorage.getItem('access');
+  if (!token) {
+    toast.error('Authentication token missing');
+    return;
+  }
 
-    ws.current.onopen = () => {
-      console.log('WebSocket connected');
-    };
+  // Include token in WebSocket URL as query parameter
+  const wsBaseUrl = `${WS_MAIN_URL.replace('https://', 'wss://').replace('http://', 'ws://')}ws/chat/${id}/?token=${token}`;
+  
+  ws.current = new WebSocket(wsBaseUrl);
+
+  ws.current.onopen = () => {
+    setIsConnected(true);
+    console.log('WebSocket connection established');
+  };
+
 
     ws.current.onmessage = (e) => {
-      const data = JSON.parse(e.data);
-
-      setMessages((prevMessages) => {
-        if (prevMessages.find((msg) => msg.id === data.message_id)) {
-          return prevMessages;
+      try {
+        const data = JSON.parse(e.data);
+        
+        // Handle different message types
+        if (data.type === 'new_message') {
+          handleNewMessage(data);
+        } else if (data.type === 'all_messages') {
+          setMessages(data.messages);
         }
-
-        const tempIndex = prevMessages.findIndex(
-          (msg) =>
-            msg.id < 0 &&
-            msg.message === data.message &&
-            msg.sender.toLowerCase() === data.sender.toLowerCase()
-        );
-
-        if (tempIndex !== -1) {
-          const updatedMessages = [...prevMessages];
-          updatedMessages[tempIndex] = {
-            id: data.message_id,
-            message: data.message,
-            sender: data.sender,
-            created_at: data.created_at,
-          };
-          return updatedMessages;
-        }
-
-        return [
-          ...prevMessages,
-          {
-            id: data.message_id,
-            message: data.message,
-            sender: data.sender,
-            created_at: data.created_at,
-          },
-        ];
-      });
+      } catch (error) {
+        console.error('Error parsing WebSocket message:', error);
+      }
     };
 
     ws.current.onerror = (e) => {
-      console.log('WebSocket error:', e);
+      console.error('WebSocket error:', e);
+      setIsConnected(false);
       toast.error('Chat connection error');
     };
 
     ws.current.onclose = (e) => {
       console.log('WebSocket closed:', e);
-      toast.info('Chat disconnected. Reconnecting...');
-      setTimeout(setupWebSocket, 3000); // Reconnect after 3 seconds
+      setIsConnected(false);
+      
+      if (e.code !== 1000 && reconnectAttempts.current < maxReconnectAttempts) {
+        const delay = Math.min(1000 * (reconnectAttempts.current + 1), 5000);
+        reconnectAttempts.current += 1;
+        toast.info(`Chat disconnected. Reconnecting in ${delay/1000} seconds...`);
+        setTimeout(setupWebSocket, delay);
+      } else if (reconnectAttempts.current >= maxReconnectAttempts) {
+        toast.error('Failed to reconnect to chat. Please refresh the page.');
+      }
     };
+  };
+
+  const handleNewMessage = (data: any) => {
+    setMessages((prevMessages) => {
+      // Check if message already exists
+      if (prevMessages.find(msg => msg.id === data.message_id)) {
+        return prevMessages;
+      }
+
+      return [
+        ...prevMessages,
+        {
+          id: data.message_id,
+          message: data.message,
+          sender: data.sender,
+          created_at: data.created_at,
+          is_admin: data.is_admin,
+          read: data.read
+        }
+      ];
+    });
   };
 
   const sendMessage = async () => {
@@ -114,9 +136,13 @@ const ChatRoom = () => {
     setNewMessage('');
 
     try {
-      if (ws.current?.readyState === WebSocket.OPEN) {
-        ws.current.send(JSON.stringify({ message: newMessage }));
+      if (isConnected && ws.current?.readyState === WebSocket.OPEN) {
+        ws.current.send(JSON.stringify({ 
+          type: 'send_message',
+          message: newMessage 
+        }));
       } else {
+        // Fallback to HTTP if WebSocket is not available
         const res = await fetch(`${API_URL}/chat/rooms/${id}/send/`, {
           method: 'POST',
           headers: {
@@ -125,25 +151,22 @@ const ChatRoom = () => {
           },
           body: JSON.stringify({ message: newMessage }),
         });
+        
+        if (!res.ok) throw new Error('Failed to send message');
+        
         const data = await res.json();
-
         setMessages((prev) =>
           prev.map((msg) =>
-            msg.id === tempId
-              ? {
-                  id: data.id,
-                  message: data.message,
-                  sender: data.sender,
-                  created_at: data.created_at,
-                }
-              : msg
+            msg.id === tempId ? {
+              id: data.id,
+              message: data.message,
+              sender: data.sender,
+              created_at: data.created_at,
+              is_admin: data.is_admin,
+              read: data.read
+            } : msg
           )
         );
-
-        await fetch(`${API_URL}/chat/rooms/${id}/mark-read/`, {
-          method: 'PATCH',
-          headers: { Authorization: `Bearer ${token}` },
-        });
       }
     } catch (error) {
       console.error('Error sending message:', error);
@@ -155,8 +178,11 @@ const ChatRoom = () => {
   useEffect(() => {
     fetchMessages();
     setupWebSocket();
+    
     return () => {
-      ws.current?.close();
+      if (ws.current) {
+        ws.current.close();
+      }
     };
   }, [id]);
 
@@ -178,6 +204,8 @@ const ChatRoom = () => {
         <div className="w-6" /> {/* Spacer for alignment */}
       </div>
 
+      
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-2">
         {messages.map((item) => {
@@ -193,11 +221,14 @@ const ChatRoom = () => {
                     hour: '2-digit',
                     minute: '2-digit',
                   })}
+                  {item.is_admin && ' • Admin'}
                 </div>
                 <div
                   className={`p-3 rounded-lg ${
                     isUser
                       ? 'bg-teal-700 text-white rounded-tr-none'
+                      : item.is_admin
+                      ? 'bg-blue-100 text-black rounded-tl-none border border-blue-200'
                       : 'bg-gray-200 text-black rounded-tl-none'
                   }`}
                 >
@@ -228,9 +259,11 @@ const ChatRoom = () => {
           />
           <button
             onClick={sendMessage}
-            disabled={!newMessage.trim()}
+            disabled={!newMessage.trim() || !isConnected}
             className={`ml-2 p-3 rounded-full ${
-              newMessage.trim() ? 'bg-teal-700 hover:bg-teal-800' : 'bg-gray-400'
+              newMessage.trim() && isConnected 
+                ? 'bg-teal-700 hover:bg-teal-800' 
+                : 'bg-gray-400 cursor-not-allowed'
             } text-white transition-colors`}
           >
             <FiSend size={20} />

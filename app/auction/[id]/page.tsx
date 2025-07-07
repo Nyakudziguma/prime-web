@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useSession } from '@/components/hooks/useSession'; 
 import CostCalculator from '@/components/Calculator';
 import { API_URL } from '@/components/config/config';
-import { FiChevronLeft, FiX } from 'react-icons/fi';
+import { FiChevronLeft, FiX, FiChevronDown } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
@@ -34,6 +34,7 @@ export default function ProductDetails() {
     seconds: '00',
   });
   const [showBuyNowConfirmation, setShowBuyNowConfirmation] = useState(false);
+  const [showScrollHint, setShowScrollHint] = useState(true);
 
   const router = useRouter();
   const params = useParams();
@@ -55,6 +56,23 @@ export default function ProductDetails() {
         console.error('Fetch error:', error);
       });
   }, [id]);
+
+  useEffect(() => {
+    const hasDismissed = localStorage.getItem('scrollHintDismissed');
+    if (hasDismissed) {
+      setShowScrollHint(false);
+    }
+
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setShowScrollHint(false);
+        localStorage.setItem('scrollHintDismissed', 'true');
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     if (!data) return;
@@ -273,7 +291,7 @@ export default function ProductDetails() {
     <DashboardLayout>
       <ToastContainer/>
       
-      {/* Main Content - Removed pb-36 */}
+      {/* Main Content */}
       <div className="flex-1">
         {/* Image Carousel */}
         <div className="relative h-96 overflow-hidden">
@@ -290,6 +308,28 @@ export default function ProductDetails() {
                 />
               </div>
             ))}
+          </div>
+
+          {/* Scroll hint - only shows on mobile */}
+          <div className="md:hidden">
+            {showScrollHint && (
+              <div className="absolute bottom-20 left-0 right-0 flex justify-center animate-bounce z-10">
+                <div className="bg-white/80 backdrop-blur-sm rounded-full p-2 shadow-lg">
+                  <div className="flex flex-col items-center">
+                    <FiChevronDown className="text-teal-600 text-2xl" />
+                    <span className="text-xs text-gray-600 mt-1">Scroll for details</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Gradient fade hint */}
+          <div className="md:hidden fixed inset-x-0 h-20 pointer-events-none" 
+               style={{
+                 top: 'calc(100vh - 200px)',
+                 background: 'linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 100%)'
+               }}>
           </div>
 
           {/* Prev Arrow */}
@@ -317,7 +357,7 @@ export default function ProductDetails() {
           )}
         </div>
 
-        {/* Product Info - Added mb-24 */}
+        {/* Product Info */}
         <div className="px-4 py-4 space-y-4 mb-24">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">{data.title}</h1>
@@ -350,7 +390,7 @@ export default function ProductDetails() {
           </div>
 
           {/* Fees and Taxes */}
-          <div className="bg-gray-100 rounded-xl p-4 shadow-sm pb-40">
+          <div className="bg-gray-100 rounded-xl p-4 shadow-sm pb-20">
             <h2 className="text-base font-semibold text-gray-800 mb-3">Fees & Taxes</h2>
             <div className="space-y-3 mb-4">
               <div>
@@ -376,13 +416,13 @@ export default function ProductDetails() {
                     {taxRate}%
                   </p>
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 ">
                   Value Added Tax applied to final amount
                 </p>
               </div>
             </div>
 
-            <div className="flex justify-center">
+            <div className="flex justify-center pb-20">
               <button
                 onClick={() => setShowCalculator(true)}
                 className="bg-teal-700 py-3 rounded-lg w-1/2 hover:bg-teal-800 transition-colors"
@@ -393,7 +433,7 @@ export default function ProductDetails() {
           </div>
         </div>
 
-        {/* Bottom Bid Section - Reduced padding and added shadow */}
+        {/* Bottom Bid Section */}
         <div className="fixed bottom-0 left-0 md:left-64 right-0 bg-white border-t border-gray-200 px-4 py-3 shadow-md">
           <div className="space-y-3 w-full max-w-lg mx-auto">
             <div className="items-center space-y-2 w-full">
