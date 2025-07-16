@@ -11,7 +11,7 @@ import { io, Socket } from 'socket.io-client';
 import CountdownTimer from '@/components/CountdownTimer';
 import DashboardLayout from '@/components/DashboardLayout';
 import { API_URL } from '@/components/config/config';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 type BidItem = {
@@ -49,6 +49,23 @@ type OfferItem = {
   is_settled: boolean;
 };
 
+type BuyNowItem = {
+  id: number;
+  auction_id: number;
+  title: string;
+  image_url: string | null;
+  location: string;
+  amount: number;
+  status: string;
+  created_at: string;
+  auction_status: string;
+  is_auction_active: boolean;
+  end_time: string;
+  condition: string;
+  category: string;
+  is_settled: boolean;
+};
+
 type UserStats = {
   balance: number;
   total_deposits: number;
@@ -59,6 +76,9 @@ type UserStats = {
   offers_pending: number;
   offers_accepted: number;
   offers_rejected: number;
+  buy_now_pending: number;
+  buy_now_accepted: number;
+  buy_now_rejected: number;
 };
 
 export default function BidsPage() {
@@ -68,7 +88,8 @@ export default function BidsPage() {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState<'bids' | 'offers'>('bids');
+  const [activeTab, setActiveTab] = useState<'bids' | 'offers' | 'buyNow'>('bids');
+  const [buyNow, setBuyNow] = useState<BuyNowItem[]>([]);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isOnline, setIsOnline] = useState(true);
 
@@ -104,6 +125,11 @@ export default function BidsPage() {
         bid.auction_id === updatedBid.auction_id ? updatedBid : bid
       ));
     });
+    socketInstance.on('buy_now_update', (updatedBuyNow: BuyNowItem) => {
+    setBuyNow(prev => prev.map(item => 
+      item.id === updatedBuyNow.id ? updatedBuyNow : item
+    ));
+  });
 
     socketInstance.on('offer_update', (updatedOffer: OfferItem) => {
       setOffers(prev => prev.map(offer => 
@@ -124,32 +150,36 @@ export default function BidsPage() {
   }, []);
 
   // Fetch data from API
-  const fetchData = async () => {
-    const token = localStorage.getItem('access');
-    try {
-      const [statsResponse, bidsResponse, offersResponse] = await Promise.all([
-        fetch(`${API_URL}/user-stats/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch(`${API_URL}/my-bids/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch(`${API_URL}/my-offers/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-      ]);
+ const fetchData = async () => {
+  const token = localStorage.getItem('access');
+  try {
+    const [statsResponse, bidsResponse, offersResponse, buyNowResponse] = await Promise.all([
+      fetch(`${API_URL}/user-stats/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      fetch(`${API_URL}/my-bids/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      fetch(`${API_URL}/my-offers/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      fetch(`${API_URL}/my-buy-now/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+    ]);
 
-      setStats(await statsResponse.json());
-      setBids(await bidsResponse.json());
-      setOffers(await offersResponse.json());
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      toast.error('Failed to load data. Please try again.');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
+    setStats(await statsResponse.json());
+    setBids(await bidsResponse.json());
+    setOffers(await offersResponse.json());
+    setBuyNow(await buyNowResponse.json());
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    toast.error('Failed to load data. Please try again.');
+  } finally {
+    setLoading(false);
+    setRefreshing(false);
+  }
+};
 
   // Handle bid settlement
   const handleSettleBid = async (auctionId: number) => {
@@ -175,6 +205,8 @@ export default function BidsPage() {
       toast.error(error.response?.data?.detail || 'Failed to settle bid');
     }
   };
+
+  
 
   // Setup network and socket listeners
   useEffect(() => {
@@ -225,28 +257,28 @@ export default function BidsPage() {
   };
 
   // Render methods
-  const renderStatsCard = (
-    title: string,
-    value: string | number,
-    color: string,
-    icon: React.ReactNode,
-    action?: React.ReactNode
-  ) => (
-    <div className={`bg-white p-4 rounded-lg shadow-sm mb-3 border ${color} w-[48%]`}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          {icon}
-          <span className="text-gray-500 text-sm ml-2">{title}</span>
-        </div>
-        {action}
+const renderStatsCard = (
+  title: string,
+  value: string | number,
+  color: string,
+  icon: React.ReactNode,
+  action?: React.ReactNode
+) => (
+  <div className={`bg-white p-2 rounded-lg shadow-sm mb-1 border ${color} w-full`}> {/* Reduced padding */}
+    <div className="flex items-center justify-between">
+      <div className="flex items-center">
+        {icon}
+        <span className="text-gray-500 text-xs ml-1">{title}</span> {/* Smaller text */}
       </div>
-      <div className="text-xl font-bold mt-1">
-        {typeof value === 'number' && title.includes('$')
-          ? `$${value.toFixed(2)}`
-          : value}
-      </div>
+      {action}
     </div>
-  );
+    <div className="text-lg font-bold mt-0.5"> {/* Smaller text and reduced margin */}
+      {typeof value === 'number' && title.includes('$')
+        ? `$${value.toFixed(2)}`
+        : value}
+    </div>
+  </div>
+);
 
   const renderBidStatus = (bid: BidItem) => {
     if (bid.is_auction_active) {
@@ -300,7 +332,7 @@ export default function BidsPage() {
     <div className="bg-white rounded-xl mb-3 shadow-sm shadow-black/10">
       <button
         className="flex p-3 w-full text-left"
-        onClick={() => router.push(`/auction/${item.auction_id}`)}
+        onClick={() => router.push(`/product/${item.auction_id}`)}
       >
         {item.image_url ? (
           <Image
@@ -352,12 +384,70 @@ export default function BidsPage() {
       </button>
     </div>
   );
+const renderBuyNowItem = (item: BuyNowItem) => (
+  <div className="bg-white rounded-xl mb-3 shadow-sm shadow-black/10">
+    <div className="flex p-3 w-full text-left">
+      <button
+        className="focus:outline-none"
+        style={{ padding: 0, margin: 0 }}
+        onClick={() => router.push(`/product/${item.auction_id}`)}
+      >
+        {item.image_url ? (
+          <Image
+            src={item.image_url}
+            width={96}
+            height={96}
+            className="w-24 h-24 rounded-md mr-3 object-cover"
+            alt={item.title}
+          />
+        ) : (
+          <div className="w-24 h-24 rounded-md mr-3 bg-gray-200 flex items-center justify-center">
+            <IoIosImages size={32} className="text-gray-400" />
+          </div>
+        )}
+      </button>
+      <div className="flex-1">
+        <div
+          className="text-base font-bold mb-1 line-clamp-2 cursor-pointer"
+          onClick={() => router.push(`/product/${item.auction_id}`)}
+        >
+          {item.title}
+        </div>
+        <div className="text-sm text-gray-600 mb-2">{item.location}</div>
+        <div className="text-xs text-gray-500 mb-2">
+          {item.category} • {item.condition}
+        </div>
 
+        <div className="mt-1">
+          <div className="text-sm font-semibold text-gray-800">
+            My Buy Now: ${item.amount.toFixed(2)}
+          </div>
+        </div>
+        
+        <div className="flex items-center justify-between mt-2">
+          {renderOfferStatus(item)}
+          {item.status === 'accepted' && !item.is_settled && (
+            <button
+              className="bg-teal-600 py-1.5 px-3 rounded-md flex items-center"
+              onClick={e => {
+                e.stopPropagation();
+                handleSettleBid(item.auction_id);
+              }}
+            >
+              <MdAttachMoney className="text-white" size={16} />
+              <span className="text-white text-sm ml-1">Settle Now</span>
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+);
   const renderOfferItem = (item: OfferItem) => (
     <div className="bg-white rounded-xl mb-3 shadow-sm shadow-black/10">
       <button
         className="flex p-3 w-full text-left"
-        onClick={() => router.push(`/auction/${item.auction_id}`)}
+        onClick={() => router.push(`/product/${item.auction_id}`)}
       >
         {item.image_url ? (
           <Image
@@ -417,52 +507,62 @@ export default function BidsPage() {
 
   return (
     <DashboardLayout>
-      {/* Stats Overview - 2x2 Grid */}
+      {/* Stats Overview - Responsive Grid */}
       {stats && (
-        <div className="flex flex-wrap justify-between px-4 py-3">
-          {renderStatsCard(
-            'Balance ($)', 
-            stats.balance, 
-            'border-teal-500',
-            <FontAwesomeIcon icon={faMoneyBill} className="text-teal-500" />
-          )}
-          {renderStatsCard(
-            'Deposits ($)', 
-            stats.total_deposits, 
-            'border-blue-500',
-            <MdAccountBalanceWallet className="text-blue-500" size={16} />,
-            <button onClick={() => router.push('/deposits')}>
-              <MdAddCircleOutline className="text-blue-500" size={20} />
-            </button>
-          )}
-
-          {renderStatsCard(
-            'Won', 
-            stats.bids_won, 
-            'border-green-500',
-            <FontAwesomeIcon icon={faTrophy} className="text-green-500" />
-          )}
-          {renderStatsCard(
-            'Lost', 
-            stats.bids_lost, 
-            'border-red-500',
-            <MdCancel className="text-red-500" size={16} />
-          )}
-          {renderStatsCard(
-            'Pending Offers', 
-            stats.offers_pending, 
-            'border-yellow-500',
-            <MdHourglassEmpty className="text-yellow-500" size={16} />
-          )}
-          {renderStatsCard(
-            'Accepted Offers', 
-            stats.offers_accepted, 
-            'border-green-500',
-            <MdCheckCircle className="text-green-500" size={16} />
-          )}
-        </div>
-      )}
-
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 px-2 py-2"> {/* Reduced gap and padding */}
+    {renderStatsCard(
+      'Balance ($)', 
+      stats.balance, 
+      'border-teal-500',
+      <FontAwesomeIcon icon={faMoneyBill} className="text-teal-500" />
+    )}
+    {renderStatsCard(
+      'Deposits ($)', 
+      stats.total_deposits, 
+      'border-blue-500',
+      <MdAccountBalanceWallet className="text-blue-500" size={16} />,
+      <button onClick={() => router.push('/deposits')}>
+        <MdAddCircleOutline className="text-blue-500" size={20} />
+      </button>
+    )}
+    {renderStatsCard(
+      'Won', 
+      stats.bids_won, 
+      'border-green-500',
+      <FontAwesomeIcon icon={faTrophy} className="text-green-500" />
+    )}
+    {renderStatsCard(
+      'Lost', 
+      stats.bids_lost, 
+      'border-red-500',
+      <MdCancel className="text-red-500" size={16} />
+    )}
+    {renderStatsCard(
+      'Pending Offers', 
+      stats.offers_pending, 
+      'border-yellow-500',
+      <MdHourglassEmpty className="text-yellow-500" size={16} />
+    )}
+    {renderStatsCard(
+      'Accepted Offers', 
+      stats.offers_accepted, 
+      'border-green-500',
+      <MdCheckCircle className="text-green-500" size={16} />
+    )}
+    {renderStatsCard(
+      'Pending Buy Now', 
+      stats.buy_now_pending, 
+      'border-yellow-500',
+      <MdHourglassEmpty className="text-yellow-500" size={16} />
+    )}
+    {renderStatsCard(
+      'Accepted Buy Now', 
+      stats.buy_now_accepted, 
+      'border-green-500',
+      <MdCheckCircle className="text-green-500" size={16} />
+    )}
+  </div>
+)}
       {/* Tabs */}
       <div className="flex border-b border-gray-200 mx-4">
         <button
@@ -481,6 +581,14 @@ export default function BidsPage() {
             My Offers
           </span>
         </button>
+        <button
+          className={`flex-1 py-3 text-center ${activeTab === 'buyNow' ? 'border-b-2 border-teal-500' : ''}`}
+          onClick={() => setActiveTab('buyNow')}
+        >
+          <span className={`font-medium ${activeTab === 'buyNow' ? 'text-teal-600' : 'text-gray-500'}`}>
+            Buy Now
+          </span>
+        </button>
       </div>
 
       {/* Content based on active tab */}
@@ -493,14 +601,14 @@ export default function BidsPage() {
               <span className="text-gray-500">You haven't placed any bids yet.</span>
               <button
                 className="mt-4 bg-teal-600 py-2 px-6 rounded-full flex items-center"
-                onClick={() => router.push('/browse-auctions')}
+                onClick={() => router.push('/products')}
               >
                 <span className="text-white font-medium ml-2">Browse Auctions</span>
               </button>
             </div>
           )}
         </div>
-      ) : (
+      ) : activeTab === 'offers' ? (
         <div className="p-3 pb-20">
           {offers.length > 0 ? (
             offers.map(offer => renderOfferItem(offer))
@@ -509,7 +617,23 @@ export default function BidsPage() {
               <span className="text-gray-500">You haven't made any offers yet.</span>
               <button
                 className="mt-4 bg-teal-600 py-2 px-6 rounded-full flex items-center"
-                onClick={() => router.push('/browse-auctions')}
+                onClick={() => router.push('/products')}
+              >
+                <span className="text-white font-medium ml-2">Browse Auctions</span>
+              </button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="p-3 pb-20">
+          {buyNow.length > 0 ? (
+            buyNow.map(item => renderBuyNowItem(item))
+          ) : (
+            <div className="flex flex-col justify-center items-center p-5">
+              <span className="text-gray-500">You haven't used Buy Now yet.</span>
+              <button
+                className="mt-4 bg-teal-600 py-2 px-6 rounded-full flex items-center"
+                onClick={() => router.push('/products')}
               >
                 <span className="text-white font-medium ml-2">Browse Auctions</span>
               </button>
@@ -517,6 +641,7 @@ export default function BidsPage() {
           )}
         </div>
       )}
+      <ToastContainer/>
     </DashboardLayout>
   );
 }

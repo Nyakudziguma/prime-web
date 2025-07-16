@@ -472,7 +472,7 @@ export default function ProductDetails() {
                   <p className="text-base font-bold text-yellow-600">$ {data.price}</p>
                 </div>
                 <div className="items-end">
-                  <p className="text-xs text-gray-500">Current {isOfferPeriod ? 'Offer' : 'Bid'}</p>
+                  <p className="text-xs text-gray-500">Current {isOfferPeriod ? 'Make an Offer' : 'Bid'}</p>
                   <p className="text-base font-bold text-yellow-600">$ {data.highest_bid}</p>
                 </div>
                 {data.buy_now_price && (

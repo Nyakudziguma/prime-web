@@ -117,7 +117,7 @@ const BrowseAuctions = () => {
         <button
           onClick={e => {
             e.stopPropagation()
-            router.push(`/auction/${auction.id}`)
+            router.push(`/product/${auction.id}`)
           }}
           className="mt-2 bg-green-600 py-1 px-2 rounded-md flex items-center justify-center hover:bg-green-700 transition-colors w-full"
         >
@@ -145,7 +145,7 @@ const BrowseAuctions = () => {
           <FiSearch className="text-gray-500" />
           <input
             type="text"
-            placeholder="Search Auctions"
+            placeholder="Search Products"
             className="ml-2 flex-1 text-gray-700 bg-transparent outline-none h-10"
             value={query}
             onChange={e => setQuery(e.target.value)}
@@ -172,7 +172,7 @@ const BrowseAuctions = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {auctions.map((auction, i) => (
               <div key={auction.id || i} className="mb-4">
-                <Link href={`/auction/${auction.id}`} className="block hover:opacity-90 transition-opacity">
+                <Link href={`/product/${auction.id}`} className="block hover:opacity-90 transition-opacity">
                   <div className="w-full bg-white rounded-xl shadow-sm overflow-hidden">
                     <div className="relative h-48 w-full">
                       <Image
@@ -208,7 +208,7 @@ const BrowseAuctions = () => {
         ) : (
           <div className="space-y-3">
             {auctions.map((auction, i) => (
-              <Link key={auction.id || i} href={`/auction/${auction.id}`} className="block hover:opacity-90 transition-opacity">
+              <Link key={auction.id || i} href={`/product/${auction.id}`} className="block hover:opacity-90 transition-opacity">
                 <div className="bg-white rounded-xl shadow-sm flex overflow-hidden mt-2">
                   <div className="relative h-28 w-28 flex-shrink-0">
                     <Image

@@ -105,7 +105,7 @@ export default function Dashboard() {
     return (
       <div
         key={auction.id}
-        onClick={() => router.push(`/auction/${auction.id}`)}
+        onClick={() => router.push(`/product/${auction.id}`)}
         className="w-48 bg-white rounded-xl shadow-sm cursor-pointer hover:shadow-md transition-shadow mr-4 flex-shrink-0 relative group"
       >
         {/* Buy Now Badge (only shown on hover if available) */}
@@ -141,7 +141,7 @@ export default function Dashboard() {
                 onClick={(e) => {
                   e.stopPropagation()
                   if (isLoggedIn) {
-                    router.push(`/auction/${auction.id}`)
+                    router.push(`/product/${auction.id}`)
                   } else {
                     router.push('/auth/login') 
                   }
@@ -162,44 +162,64 @@ export default function Dashboard() {
                 <p className="text-xs text-green-600 mt-1">Reserve Met</p>
               )}
               
-              {/* Buttons Container - Side by side when both exist */}
-              <div className={`flex gap-1 mt-1 ${hasBuyNow ? 'flex-row' : 'flex-col'}`}>
-                {/* Buy Now Button (only shown if available) */}
-                {hasBuyNow && (
-                  <button
-                    className="flex-1 bg-blue-600 py-1 px-1 rounded-md hover:bg-blue-700 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      if (isLoggedIn) {
-                        router.push(`/auction/${auction.id}?buyNow=true`)
-                      } else {
-                        router.push('/auth/login')
-                      }
-                    }}
-                  >
-                    <p className="text-center text-white text-xs font-semibold truncate">
-                      Buy Now
-                    </p>
-                  </button>
-                )}
-
-                {/* Bid Button */}
+              {/* Buttons Container - Handle buy now only case */}
+              {auction.is_buy_now_only ? (
+                // Buy Now Only Button
                 <button
-                  className={`${hasBuyNow ? 'flex-1' : 'w-full'} bg-teal-700 py-1 px-1 rounded-md hover:bg-teal-800 transition-colors`}
+                  className="w-full bg-blue-600 py-1 px-1 rounded-md hover:bg-blue-700 transition-colors mt-1"
                   onClick={(e) => {
                     e.stopPropagation()
                     if (isLoggedIn) {
-                      router.push(`/auction/${auction.id}`)
+                      router.push(`/product/${auction.id}?buyNow=true`)
                     } else {
                       router.push('/auth/login')
                     }
                   }}
                 >
                   <p className="text-center text-white text-xs font-semibold truncate">
-                    {isLoggedIn ? 'Bid Now' : 'Login to Bid'}
+                    Buy Now
                   </p>
                 </button>
-              </div>
+              ) : (
+                // Regular buttons (Buy Now + Bid or just Bid)
+                <div className={`flex gap-1 mt-1 ${hasBuyNow ? 'flex-row' : 'flex-col'}`}>
+                  {/* Buy Now Button (only shown if available) */}
+                  {hasBuyNow && (
+                    <button
+                      className="flex-1 bg-blue-600 py-1 px-1 rounded-md hover:bg-blue-700 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        if (isLoggedIn) {
+                          router.push(`/product/${auction.id}?buyNow=true`)
+                        } else {
+                          router.push('/auth/login')
+                        }
+                      }}
+                    >
+                      <p className="text-center text-white text-xs font-semibold truncate">
+                        Buy Now
+                      </p>
+                    </button>
+                  )}
+
+                  {/* Bid Button */}
+                  <button
+                    className={`${hasBuyNow ? 'flex-1' : 'w-full'} bg-teal-700 py-1 px-1 rounded-md hover:bg-teal-800 transition-colors`}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      if (isLoggedIn) {
+                        router.push(`/product/${auction.id}`)
+                      } else {
+                        router.push('/auth/login')
+                      }
+                    }}
+                  >
+                    <p className="text-center text-white text-xs font-semibold truncate">
+                      {isLoggedIn ? 'Bid Now' : 'Login to Bid'}
+                    </p>
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -1,7 +1,7 @@
 // components/Banner.tsx
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { FaHome, FaMapMarkerAlt } from 'react-icons/fa'
 import { API_URL } from './config/config'
@@ -24,6 +24,34 @@ function Banner() {
   const [activeIndex, setActiveIndex] = useState(0)
   const scrollRef = useRef<HTMLDivElement>(null)
   const { width: screenWidth } = useWindowSize()
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  const scrollToIndex = useCallback((index: number) => {
+    if (!scrollRef.current) return
+    
+    const itemWidth = (screenWidth || 0) - 40
+    scrollRef.current.scrollTo({
+      left: index * itemWidth,
+      behavior: 'smooth'
+    })
+    setActiveIndex(index)
+  }, [screenWidth])
+
+  // Auto slide every 5 seconds
+  useEffect(() => {
+    if (campaigns.length <= 1) return // Don't auto-slide if there's only one item
+    
+    intervalRef.current = setInterval(() => {
+      const nextIndex = (activeIndex + 1) % campaigns.length
+      scrollToIndex(nextIndex)
+    }, 5000)
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+    }
+  }, [activeIndex, campaigns.length, scrollToIndex])
 
   useEffect(() => {
     const fetchCampaigns = async () => {
@@ -48,6 +76,15 @@ function Banner() {
     const itemWidth = (screenWidth || 0) - 40
     const index = Math.round(scrollLeft / itemWidth)
     setActiveIndex(index)
+    
+    // Reset the auto-slide timer when user manually scrolls
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+    }
+    intervalRef.current = setInterval(() => {
+      const nextIndex = (activeIndex + 1) % campaigns.length
+      scrollToIndex(nextIndex)
+    }, 5000)
   }
 
   if (loading) {
@@ -162,13 +199,15 @@ function Banner() {
           <button
             key={index}
             onClick={() => {
-              if (scrollRef.current) {
-                const itemWidth = (screenWidth || 0) - 40
-                scrollRef.current.scrollTo({
-                  left: index * itemWidth,
-                  behavior: 'smooth'
-                })
+              scrollToIndex(index)
+              // Reset the auto-slide timer when user clicks on a dot
+              if (intervalRef.current) {
+                clearInterval(intervalRef.current)
               }
+              intervalRef.current = setInterval(() => {
+                const nextIndex = (activeIndex + 1) % campaigns.length
+                scrollToIndex(nextIndex)
+              }, 5000)
             }}
             className={`rounded-full transition-all duration-300 ${activeIndex === index ? 'w-3 h-3 bg-yellow-400' : 'w-2 h-2 bg-gray-400'}`}
             aria-label={`Go to slide ${index + 1}`}

@@ -38,13 +38,13 @@ const Header = ({ toggleSidebar }: { toggleSidebar?: () => void }) => {
           <div className="md:hidden flex items-center">
             <Image
               src={logo}
-              alt="Prime Auctions Logo"
+              alt="Prime Edge Logo"
               width={32}
               height={32}
               className="filter brightness-0 invert"
               onClick={() => router.push('/dashboard')}
             />
-            <h3 className="text-xl font-bold text-white  md:block">PRIME AUCTIONS</h3>
+            <h3 className="text-xl font-bold text-white  md:block">PRIME EDGE</h3>
           </div>
         </div>
 

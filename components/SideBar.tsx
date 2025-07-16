@@ -16,7 +16,8 @@ import {
   DocumentChartBarIcon,
   DocumentArrowDownIcon,
   CreditCardIcon,
-  DocumentCheckIcon
+  DocumentCheckIcon, 
+  ShoppingBagIcon
 } from '@heroicons/react/24/outline'
 import logo from '@/assets/images/logo_white.png'
 
@@ -41,8 +42,8 @@ export default function Sidebar() {
 
   const navItems = [
     { name: 'Home', icon: HomeIcon, route: '/dashboard', protected: false },
-    { name: 'Auctions', icon: ShoppingCartIcon, route: '/browse-auctions', protected: false },
-    { name: 'My Bids', icon: ScaleIcon, route: '/my-bids', protected: true },
+    {name: 'Products', icon:ShoppingBagIcon, route: '/products', protected: false},
+    { name: 'My Products', icon: ScaleIcon, route: '/my-products', protected: true },
     { name: 'Messages', icon: InboxIcon, route: '/messages', protected: true, badge: unreadMessages },
     { name: 'Profile', icon: UserIcon, route: '/profile', protected: true },
     { name: 'Payments', icon: CreditCardIcon, route: '/deposits', protected: true },
@@ -65,12 +66,12 @@ export default function Sidebar() {
         <div className="flex items-center space-x-3">
           <Image
             src={logo}
-            alt="Prime Auctions Logo"
+            alt="Prime Edge Logo"
             width={48}
             height={48}
             className="filter brightness-0 invert"
           />
-          <h1 className="text-xl font-bold text-white hidden md:block">PRIME AUCTIONS</h1>
+          <h1 className="text-xl font-bold text-white hidden md:block">PRIME EDGE</h1>
         </div>
       </div>
 

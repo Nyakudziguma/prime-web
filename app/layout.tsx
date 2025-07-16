@@ -4,7 +4,7 @@ import './globals.css'
 import { ClientRoot } from './client-root'
 
 export const metadata: Metadata = {
-  title: 'Prime Auctions',
+  title: 'Prime Edge',
   description: 'Your one stop solution for online auctions',
   themeColor: '#000000',
 }
