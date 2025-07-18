@@ -179,7 +179,7 @@ const BrowseAuctions = () => {
                   <div className="w-full bg-white rounded-xl shadow-sm overflow-hidden">
                     <div className="relative h-48 w-full">
                       <Image
-                        src={auction.images?.[0]?.image_url || 'https://backoffice.primeauctions.shop/media/preview.png'}
+                        src={auction.images?.[0]?.image_url || 'https://backoffice.primeedge.co.zw/media/preview.png'}
                         alt={auction.title}
                         fill
                         className="object-cover"
@@ -215,7 +215,7 @@ const BrowseAuctions = () => {
                 <div className="bg-white rounded-xl shadow-sm flex overflow-hidden mt-2">
                   <div className="relative h-28 w-28 flex-shrink-0">
                     <Image
-                      src={auction.images?.[0]?.image_url || 'https://backoffice.primeauctions.shop/media/preview.png'}
+                      src={auction.images?.[0]?.image_url || 'https://backoffice.primeedge.co.zw/media/preview.png'}
                       alt={auction.title}
                       fill
                       className="object-cover"

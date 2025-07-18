@@ -117,7 +117,7 @@ export default function Dashboard() {
 
         <div className="relative h-28 w-full rounded-t-xl overflow-hidden">
           <Image
-            src={auction.images[0]?.image_url || 'https://backoffice.primeauctions.shop/media/preview.png'}
+            src={auction.images[0]?.image_url || 'https://backoffice.primeedge.co.zw/media/preview.png'}
             alt={auction.title}
             fill
             className="object-cover"

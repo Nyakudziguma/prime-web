@@ -110,7 +110,7 @@ export default function Sidebar() {
       {/* Extras Section */}
       <div className="p-4 border-t border-gray-100 space-y-3">
         <button
-          onClick={() => window.open('https://backoffice.primeauctions.shop/media/prime%20auctions.apk', '_blank')}
+          onClick={() => window.open('https://backoffice.primeedge.co.zw/media/prime%20auctions.apk', '_blank')}
           className="flex items-center w-full p-3 text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-colors"
         >
           <svg className="h-5 w-5 mr-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
