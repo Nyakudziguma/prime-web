@@ -18,11 +18,13 @@ const BrowseAuctions = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
 
+  // Get all filter params
   const categoryId = searchParams.get('categoryId')
   const category_id = searchParams.get('category_id')
   const campaign = searchParams.get('campaign')
   const condition = searchParams.get('condition')
   const make = searchParams.get('make')
+  const price_range = searchParams.get('price_range')
   const querySearch = searchParams.get('querySearch')
 
   const fetchAuctions = async (searchQuery = '', category = '') => {
@@ -52,6 +54,7 @@ const BrowseAuctions = () => {
       if (campaign) appendMultiple('campaign', campaign)
       if (condition) appendMultiple('condition', condition)
       if (make) appendMultiple('make', make)
+      if (price_range) appendMultiple('price_range', price_range)
       if (query) params.append('q', query)
 
       url = `${API_URL}/auctions/filters/params/?${params.toString()}`
@@ -70,7 +73,7 @@ const BrowseAuctions = () => {
 
   useEffect(() => {
     fetchAuctions(query, categoryId as string)
-  }, [categoryId, category_id, campaign, condition, make, querySearch])
+  }, [categoryId, category_id, campaign, condition, make, price_range, querySearch])
 
   const handleSearch = () => fetchAuctions(query)
 

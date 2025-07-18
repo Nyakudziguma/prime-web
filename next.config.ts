@@ -2,7 +2,7 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ['backoffice.primeauctions.shop','placehold.co'],
+    domains: ['backoffice.primeedge.co.zw','placehold.co'],
   },
 }
 

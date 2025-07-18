@@ -12,14 +12,17 @@ type FilterItem = {
   count?: number
   make?: string
   condition?: string
+  min?: number
+  max?: number | null
+  label?: string
 }
 
-// Define state shape
 type FilterState = {
   campaigns: number[]
   makes: string[]
   categories: number[]
   conditions: string[]
+  priceRanges: string[] // will store range labels like "Under $100"
 }
 
 const FiltersPage = () => {
@@ -30,32 +33,33 @@ const FiltersPage = () => {
   const [conditions, setConditions] = useState<FilterItem[]>([])
   const [loading, setLoading] = useState(true)
 
+  const [priceRanges, setPriceRanges] = useState<FilterItem[]>([])
   const [selected, setSelected] = useState<FilterState>({
     campaigns: [],
     makes: [],
     categories: [],
     conditions: [],
+    priceRanges: [],
   })
-
   useEffect(() => {
-    const fetchFilters = async () => {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auctions/filters/`)
-        const data = await res.json()
-        setCampaigns(data.campaigns)
-        setMakes(data.makes)
-        setCategories(data.categories)
-        setConditions(data.conditions)
-      } catch (error) {
-        console.error('Error fetching filters:', error)
-      } finally {
-        setLoading(false)
-      }
+  const fetchFilters = async () => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auctions/filters/`)
+      const data = await res.json()
+      setCampaigns(data.campaigns)
+      setMakes(data.makes)
+      setCategories(data.categories)
+      setConditions(data.conditions)
+      setPriceRanges(data.price_ranges) // Add this line
+    } catch (error) {
+      console.error('Error fetching filters:', error)
+    } finally {
+      setLoading(false)
     }
+  }
 
-    fetchFilters()
-  }, [])
-
+  fetchFilters()
+}, [])
   const toggle = <T extends keyof FilterState>(type: T, value: FilterState[T][number]) => {
   setSelected((prev) => {
     const list = prev[type] as Array<typeof value>
@@ -76,7 +80,7 @@ const FiltersPage = () => {
     title: string,
     items: FilterItem[],
     type: keyof FilterState,
-    key: 'name' | 'make' | 'condition' = 'name'
+    key: 'name' | 'make' | 'condition' | 'label' = 'name'
   ) => (
     <div className="mb-4">
       <h3 className="font-semibold text-base text-gray-700 mb-2">{title}</h3>
@@ -107,17 +111,26 @@ const FiltersPage = () => {
     </div>
   )
 
-  const handleShowLots = () => {
-    const { campaigns, categories, conditions, makes } = selected
-    const queryParams = new URLSearchParams()
+const handleShowLots = () => {
+  const { campaigns, categories, conditions, makes, priceRanges: selectedPriceRanges } = selected;
+  const queryParams = new URLSearchParams();
 
-    if (campaigns.length > 0) queryParams.append('campaign', campaigns.join(','))
-    if (categories.length > 0) queryParams.append('category_id', categories.join(','))
-    if (conditions.length > 0) queryParams.append('condition', conditions.join(','))
-    if (makes.length > 0) queryParams.append('make', makes.join(','))
+  if (campaigns.length > 0) queryParams.append('campaign', campaigns.join(','));
+  if (categories.length > 0) queryParams.append('category_id', categories.join(','));
+  if (conditions.length > 0) queryParams.append('condition', conditions.join(','));
+  if (makes.length > 0) queryParams.append('make', makes.join(','));
 
-    router.push(`/browse-auctions?${queryParams.toString()}`)
+  // Add price range filtering
+  if (selectedPriceRanges.length > 0) {
+    const selectedRanges = selectedPriceRanges.map(rangeLabel => {
+      const foundRange = priceRanges.find(r => r.label === rangeLabel);
+      return `${foundRange?.min}-${foundRange?.max}`;
+    });
+    queryParams.append('price_range', selectedRanges.join(','));
   }
+
+  router.push(`/browse-auctions?${queryParams.toString()}`);
+};
 
   return (
     <div className="relative min-h-screen bg-stone-100">
@@ -133,6 +146,7 @@ const FiltersPage = () => {
               {renderFilterGroup('Makes', makes, 'makes', 'make')}
               {renderFilterGroup('Categories', categories, 'categories')}
               {renderFilterGroup('Conditions', conditions, 'conditions', 'condition')}
+              {renderFilterGroup('Price Range', priceRanges, 'priceRanges', 'label')}
             </div>
           )}
         </div>
