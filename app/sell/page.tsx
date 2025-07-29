@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { EnvelopeIcon, HomeIcon, UserIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline'
+import { EnvelopeIcon, HomeIcon, PhoneArrowDownLeftIcon, UserIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline'
 import DashboardLayout from '@/components/DashboardLayout'
 import toast from 'react-hot-toast'
 
@@ -12,7 +12,8 @@ const SellPage = () => {
     name: '',
     email: '',
     address: '',
-    item_description: ''
+    item_description: '',
+    phone_number: ''
   })
   const [loading, setLoading] = useState(false)
 
@@ -103,6 +104,21 @@ const SellPage = () => {
                   placeholder="your@email.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-1">Phone Number *</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <PhoneArrowDownLeftIcon className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="phone_number"
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-teal-500 focus:border-teal-500"
+                  placeholder="+263 ...  "
+                  value={formData.phone_number}
+                  onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
                 />
               </div>
             </div>

@@ -17,7 +17,8 @@ import {
   DocumentArrowDownIcon,
   CreditCardIcon,
   DocumentCheckIcon, 
-  ShoppingBagIcon
+  ShoppingBagIcon,
+  PhoneIcon
 } from '@heroicons/react/24/outline'
 import logo from '@/assets/images/logo_white.png'
 
@@ -50,6 +51,13 @@ export default function Sidebar() {
     { name: 'Buyer\'s Guide', icon: DocumentChartBarIcon, route: '/buyers-guide', protected: true },
     { name: 'Seller\'s Guide', icon: DocumentArrowDownIcon, route: '/sellers-guide', protected: true },
     { name: 'Settings', icon: CogIcon, route: '/settings', protected: true },
+    { 
+      name: 'Call Support', 
+      icon: PhoneIcon, 
+      route: 'tel:+263782062295', 
+      protected: false,
+      isCallButton: true 
+    },
     {name: 'About Us', icon: UserIcon, route: '/about', protected: false},
     {name: 'Terms & Conditions', icon: DocumentCheckIcon , route: '/terms-of-service', protected: false},
   ]

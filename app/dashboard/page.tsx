@@ -265,7 +265,7 @@ export default function Dashboard() {
           href="/sell"
           className="bg-teal-900 px-6 py-3 rounded-full shadow-md text-white font-semibold hover:bg-teal-800 transition text-center"
         >
-          Sell with Prime Auctions
+          Sell with Prime Edge
         </Link>
         <Link
           href="/browse-auctions"
@@ -276,7 +276,7 @@ export default function Dashboard() {
       </div>
 
       {/* Categories section */}
-      <section className="mb-6">
+     <section className="mb-6">
         <h2 className="text-lg font-semibold text-gray-700 mb-2">Browse by Categories</h2>
 
         <div className="relative">
@@ -297,7 +297,7 @@ export default function Dashboard() {
               <div
                 key={category.id}
                 onClick={() => router.push(`/browse-auctions?categoryId=${category.id}`)}
-                className="inline-block bg-white px-4 py-3 mr-3 rounded-lg shadow-sm text-center cursor-pointer hover:shadow-md transition-shadow w-24"
+                className="inline-block bg-white px-4 py-3 mr-3 rounded-lg shadow-sm text-center cursor-pointer hover:shadow-md transition-shadow w-24 relative group overflow-hidden"
               >
                 <div className="flex justify-center mb-1 text-gray-500">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -309,7 +309,29 @@ export default function Dashboard() {
                     <circle cx="19" cy="12" r="1.5"/>
                   </svg>
                 </div>
-                <p className="text-xs font-medium text-yellow-600 truncate">{category.name}</p>
+                
+                {/* Scrolling Text Container */}
+                <div className="w-full overflow-hidden relative h-5">
+                  <p 
+                    className="text-xs font-medium text-yellow-600 whitespace-nowrap absolute left-0 hover:animate-marquee"
+                    style={{ 
+                      animationDuration: `${category.name.length * 0.2}s`,
+                      animationIterationCount: "infinite"
+                    }}
+                  >
+                    {category.name}
+                  </p>
+                  {/* Duplicate for seamless looping */}
+                  <p 
+                    className="text-xs font-medium text-yellow-600 whitespace-nowrap absolute left-full hover:animate-marquee"
+                    style={{ 
+                      animationDuration: `${category.name.length * 0.2}s`,
+                      animationIterationCount: "infinite"
+                    }}
+                  >
+                    {category.name}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
@@ -323,7 +345,6 @@ export default function Dashboard() {
           </button>
         </div>
       </section>
-
 
       {/* Auction Schedule */}
       <section className="mb-8">
@@ -455,7 +476,7 @@ export default function Dashboard() {
       </section>
       <section className="mb-8">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-700">Stands / Farms </h2>
+          <h2 className="text-lg font-semibold text-gray-700">Properties </h2>
           <button 
             onClick={() => router.push('/browse-auctions')}
             className="text-sm text-yellow-600 hover:text-yellow-800"

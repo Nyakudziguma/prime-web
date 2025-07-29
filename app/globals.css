@@ -32,3 +32,15 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.hover\:animate-marquee:hover {
+  animation: marquee linear infinite;
+}
